@@ -23,7 +23,7 @@ public class SlotArmor extends Slot {
     */
    final EntityPlayer player;
 
-   SlotArmor(EntityPlayer par1Player, IInventory par2IInventory, int par3, int par4, int par5, int par6)
+   public SlotArmor(EntityPlayer par1Player, IInventory par2IInventory, int par3, int par4, int par5, int par6)
    {
            super(par2IInventory, par3, par4, par5);
            this.player = par1Player;
