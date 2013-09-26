@@ -1,109 +1,167 @@
 package NarutoStyleEyeInventory;
 
 import NarutoStyleItems.Sharingan;
-import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public class InventoryEye extends InventoryBasic {
-
-private int activeSlot = 0;
-
-public InventoryEye()
+public class InventoryEye implements IInventory
 {
-super("Eyes", true, ContainerEye.ACTIVE_SLOT + 1);
-}
+	public static final int INV_SIZE = 2, ACTIVE_SLOT = INV_SIZE;
+	
+	private final ItemStack[] items = new ItemStack[INV_SIZE];
+	
+	private final NBTTagCompound compound;
+	
+	public InventoryEye(NBTTagCompound compound) {
+		this.compound = compound;
+	}
+	
+	/**
+	 * Returns index of slot that is 'active'
+	 */
+	public int getActiveSlot() {
+		return compound.getInteger("ActiveSlot");
+	}
 
-/** Returns index of slot that is 'active' */
-public int getActiveSlot()
-{
-return this.activeSlot;
-}
+	/**
+	 * Sets the active slot index to the next index within the inventory size
+	 */
+	public void nextActiveSlot()
+	{
+		int activeSlot = getActiveSlot() + 1;
+		if (activeSlot == ACTIVE_SLOT) { activeSlot = 0; }
+		compound.setInteger("ActiveSlot", activeSlot);
+	}
+	
+	@Override
+	public int getSizeInventory() {
+		return items.length;
+	}
 
-/** Sets the currently active slot index */
-public void setActiveSlot(int slotIndex)
-{
-this.activeSlot = slotIndex;
-}
+	@Override
+	public ItemStack getStackInSlot(int slot) {
+		if (slot == ACTIVE_SLOT) {
+			return items[getActiveSlot()];
+		} else {
+			return items[slot];
+		}
+	}
 
-/** Allows cycling of the active slot index */
-public void nextActiveSlot()
-{
-++this.activeSlot;
-if (this.activeSlot == this.getSizeInventory()) {
-this.activeSlot = 0;
-}
-}
+	@Override
+	public ItemStack decrStackSize(int slot, int amount)
+	{
+		ItemStack stack = getStackInSlot(slot);
+		
+		if(stack != null)
+		{
+			if(stack.stackSize > amount)
+			{
+				stack = stack.splitStack(amount);
+				onInventoryChanged();
+			} else {
+				setInventorySlotContents(slot, null);
+			}
+		}
+		
+		return stack;
+	}
 
-/**
-         * Returns the stack in slot index
-         */
-@Override
-public ItemStack getStackInSlot(int index)
-{
-if (index == ContainerEye.ACTIVE_SLOT) {
-return super.getStackInSlot(this.activeSlot);
-}
-else {
-return super.getStackInSlot(index);
-}
-}
+	@Override
+	public ItemStack getStackInSlotOnClosing(int slot)
+	{
+		ItemStack stack = getStackInSlot(slot);
+		setInventorySlotContents(slot, null);
+		return stack;
+	}
 
-/**
-         * Returns the maximum stack size for a inventory slot. Seems to always be 64, possibly will be extended. *Isn't
-         * this more of a set than a get?*
-         */
-@Override
-public int getInventoryStackLimit()
-{
-         // return NarutoStyleItems.Sharingan.getMaxStackSize();
-return 1;
-}
+	@Override
+	public void setInventorySlotContents(int slot, ItemStack itemstack)
+	{
+		this.items[slot] = itemstack;
 
-/**
-         * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot.
-         */
-@Override
-public boolean isItemValidForSlot(int par1, ItemStack itemstack)
-{
-	Sharingan sharingan = new Sharingan(4015);
-          return itemstack.itemID == sharingan.itemID;
-//return true;
-}
+		if (itemstack != null && itemstack.stackSize > getInventoryStackLimit()) {
+			itemstack.stackSize = getInventoryStackLimit();
+		}
 
-public void readFromNBT(NBTTagCompound tagCompound)
-{
-NBTTagList nbttaglist = tagCompound.getTagList("EyeInventory");
+		this.onInventoryChanged();
+	}
 
-for (int i = 0; i < nbttaglist.tagCount(); ++i)
-{
-NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbttaglist.tagAt(i);
-byte b0 = nbttagcompound1.getByte("Slot");
-this.setInventorySlotContents(b0, ItemStack.loadItemStackFromNBT(nbttagcompound1));
-}
-this.activeSlot = tagCompound.getShort("ActiveEye");
-}
+	@Override
+	public String getInvName() {
+		return null;
+	}
 
-public void writeToNBT(NBTTagCompound tagCompound)
-{
-NBTTagList nbttaglist = new NBTTagList();
+	@Override
+	public boolean isInvNameLocalized() {
+		return false;
+	}
 
-// Don't need to save ItemStack in active slot
-for (int i = 0; i < ContainerEye.ACTIVE_SLOT; ++i)
-{
-if (this.getStackInSlot(i) != null)
-{
-NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-nbttagcompound1.setByte("Slot", (byte)i);
-this.getStackInSlot(i).writeToNBT(nbttagcompound1);
-nbttaglist.appendTag(nbttagcompound1);
-}
-}
+	@Override
+	public int getInventoryStackLimit() {
+		return 1;
+	}
 
-tagCompound.setTag("EyeInventory", nbttaglist);
-tagCompound.setShort("ActiveEye", (short) this.activeSlot);
-}
+	@Override
+	public void onInventoryChanged()
+	{
+		for (int i = 0; i < this.getSizeInventory(); ++i)
+		{
+			if (getStackInSlot(i) != null && getStackInSlot(i).stackSize == 0)
+				setInventorySlotContents(i, null);
+		}
+	}
 
+	@Override
+	public boolean isUseableByPlayer(EntityPlayer entityplayer) {
+		return true;
+	}
 
+	@Override
+	public void openChest() {}
+
+	@Override
+	public void closeChest() {}
+	
+	@Override
+	public boolean isItemValidForSlot(int slot, ItemStack stack) {
+		/** NEVER declare a new Item outside of your main mod!!! */
+		//Sharingan sharingan = new Sharingan(4015);
+		return stack.getItem() instanceof Sharingan;
+	}
+	
+	public void readFromNBT(NBTTagCompound compound)
+	{
+		NBTTagList items = compound.getTagList("EyeInventory");
+		
+		for (int i = 0; i < items.tagCount(); ++i)
+		{
+			NBTTagCompound item = (NBTTagCompound) items.tagAt(i);
+			byte slot = item.getByte("Slot");
+
+			if (slot >= 0 && slot < getSizeInventory()) {
+				setInventorySlotContents(slot, ItemStack.loadItemStackFromNBT(item));
+			}
+		}
+	}
+	
+	public void writeToNBT(NBTTagCompound compound)
+	{
+		NBTTagList items = new NBTTagList();
+		
+		for (int i = 0; i < getSizeInventory(); ++i)
+		{
+			if (getStackInSlot(i) != null)
+			{
+				NBTTagCompound item = new NBTTagCompound();
+				item.setByte("Slot", (byte) i);
+				getStackInSlot(i).writeToNBT(item);
+				items.appendTag(item);
+			}
+		}
+		
+		compound.setTag("EyeInventory", items);
+	}
 }
