@@ -17,7 +17,7 @@ import cpw.mods.fml.common.network.Player;
 public class PacketHandler implements IPacketHandler
 {
 	/** Defining packet ids allow for subtypes of Packet250CustomPayload all on single channel */
-	public static final byte OPEN_SERVER_GUI = 1, NEXT_ACTIVE_SLOT = 2;
+	public static final byte OPEN_SERVER_GUI = 1, NEXT_ACTIVE_SLOT = 2, USE_SHARINGAN = 3;
 
 	@Override
 	public void onPacketData(INetworkManager manager, Packet250CustomPayload packet, Player player)
@@ -40,12 +40,13 @@ public class PacketHandler implements IPacketHandler
 			// Handle each case appropriately:
 			switch(packetType) {
 			case OPEN_SERVER_GUI: handleOpenGuiPacket(packet, (EntityPlayer) player, inputStream); break;
-			case NEXT_ACTIVE_SLOT: handleNextActiveSlot(packet, (EntityPlayer) player, inputStream); break;
+			case NEXT_ACTIVE_SLOT: handleNextActiveSlot(packet, (EntityPlayer) player); break;
+			case USE_SHARINGAN: handleUseSharingan(packet, (EntityPlayer) player); break;
 			default: System.out.println("[PACKET][WARNING] Unknown packet type " + packetType);
 			}
 		}
 	}
-	
+
 	/**
 	 * Sends a packet to the server telling it to open gui for player
 	 */
@@ -80,6 +81,23 @@ public class PacketHandler implements IPacketHandler
 		
 		PacketDispatcher.sendPacketToServer(PacketDispatcher.getPacket(NarutoStyle_main.channel, bos.toByteArray()));
 	}
+	
+	/**
+	 * Sends a packet informing server player to use power of currently active sharingan, if any
+	 */
+	public static final void sendUseEyePacket()
+	{
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream outputStream = new DataOutputStream(bos);
+		
+		try {
+			outputStream.writeByte(USE_SHARINGAN);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		
+		PacketDispatcher.sendPacketToServer(PacketDispatcher.getPacket(NarutoStyle_main.channel, bos.toByteArray()));
+	}
 
 	/**
 	 * This method will open the appropriate server gui element for the player
@@ -98,7 +116,16 @@ public class PacketHandler implements IPacketHandler
 		player.openGui(NarutoStyle_main.instance, guiId, player.worldObj, (int) player.posX, (int) player.posY, (int) player.posZ);
 	}
 	
-	private void handleNextActiveSlot(Packet250CustomPayload packet, EntityPlayer player, DataInputStream inputStream) {
+	private void handleNextActiveSlot(Packet250CustomPayload packet, EntityPlayer player) {
 		ExtendedPlayer.get(player).sharingan.nextActiveSlot();
+	}
+	
+	private void handleUseSharingan(Packet250CustomPayload packet, EntityPlayer player)
+	{
+		ItemStack eye = ExtendedPlayer.get(player).sharingan.getStackInSlot(ExtendedPlayer.get(player).sharingan.getActiveSlot());
+		
+		if (eye != null && eye.getItem() instanceof Sharingan) {
+			Sharingan.useSharingan(eye, player);
+		}
 	}
 }
