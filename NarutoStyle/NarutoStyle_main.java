@@ -20,6 +20,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.EnumHelper;
 import NarutoStyleBlocks.TileEntityDeidaraClay;
 import NarutoStyleEntitys.EntityC3;
@@ -42,14 +43,17 @@ import NarutoStyleItems.C3;
 import NarutoStyleItems.ClayBird;
 import NarutoStyleItems.ClaySpider;
 import NarutoStyleItems.MadaraArmor;
-import NarutoStyleItems.gunbai;
+import NarutoStyleItems.Gunbai;
 import cpw.mods.fml.client.registry.KeyBindingRegistry;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
+import cpw.mods.fml.common.Mod.PreInit;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
@@ -67,29 +71,29 @@ public class NarutoStyle_main {
 
 	public static final Logger L = Logger.getLogger("NarutoStyle");
 	public static Item gunbai;
-	public static Item ClaySpider;
-	public static Item MadaraHelmet;
-	public static Item MadaraChestPlate;
-	public static Item MadaraLegging;
-	public static Item MadaraBoots;
-	public static Item MadaraSkull;
-	public static Block BlockMadaraSkull;
-	public static Item ClayBird;
-	public static Item C3;
-	public static Item NarutoStylePainting;
-	public static Item FourthHokageKunai;
-	public static Item DeidaraHand;
-	public static Item SmokeBomb;
-	public static Item Sharingan;
+	public static Item claySpider;
+	public static Item madaraHelmet;
+	public static Item madaraChestPlate;
+	public static Item madaraLegging;
+	public static Item madaraBoots;
+	public static Item madaraSkull;
+	public static Block blockMadaraSkull;
+	public static Item clayBird;
+	public static Item c3;
+	public static Item narutoStylePainting;
+	public static Item fourthHokageKunai;
+	public static Item deidaraHand;
+	public static Item smokeBomb;
+	public static Item sharingan;
 	private static int modGuiIndex = 0;
-	public static Item AkatsukiScroll;
+	public static Item akatsukiScroll;
 	public static KonohaGen konohaGen = new KonohaGen(); 
-	public static Item DeidaraHair;
-	public static BiomeGenBase DeidaraArena;
-	public static Block DeidaraClay;
-
-	static KeyBinding[] key = {new KeyBinding("Eyes", Keyboard.KEY_M)};
-    static boolean[] repeat = {false};
+	public static Item deidaraHair;
+	public static BiomeGenBase deidaraArena;
+	public static Block deidaraClay;
+	public static boolean someConfigFlag;
+	//static KeyBinding[] key = {new KeyBinding("Eyes", Keyboard.KEY_M)};
+    //static boolean[] repeat = {false};
 	
 
 	// GUI indices:
@@ -107,11 +111,29 @@ public class NarutoStyle_main {
 	static int startEntityId = 6001;
 	public static CreativeTabs NarutoStyle = new CreativeTabs("NarutoStyle"){
 		public ItemStack getIconItemStack(){
-			return new ItemStack(ClaySpider);
+			return new ItemStack(claySpider);
 		}
 	};
 	
-	
+
+    @EventHandler
+    public void preInit(FMLPreInitializationEvent event) {
+    	
+
+    	Configuration config = new Configuration(event.getSuggestedConfigurationFile());
+    	
+
+    	config.load();
+    	
+    	int randomBlockId = config.getBlock("Random", 200).getInt();
+    	// Since this flag is a boolean, we can read it into the variable directly from the config.
+        someConfigFlag = config.get(Configuration.CATEGORY_GENERAL, "SomeConfigFlag", false).getBoolean(false);
+        //RegisterKeyBindings.init(config); 
+        if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
+			 RegisterKeyBindings.init(config);
+
+        config.save();
+    }
 	 
 	@EventHandler
 	public void load(FMLInitializationEvent event)
@@ -129,52 +151,52 @@ public class NarutoStyle_main {
 		
 		
 		// Introduction Items and armors
-		gunbai = new gunbai(4001,GunbaiTool).setUnlocalizedName("gunbai").setCreativeTab(NarutoStyle);
-		ClaySpider = new ClaySpider(4002).setUnlocalizedName("ClaySpider").setCreativeTab(NarutoStyle);
-		MadaraHelmet = new MadaraArmor(4003,MadaraArmor,Proxy.addArmor("MadaraArmor"), 0).setUnlocalizedName("MadaraHelmet").setCreativeTab(NarutoStyle);
-		MadaraChestPlate = new MadaraArmor(4004,MadaraArmor,Proxy.addArmor("MadaraArmor"),1).setUnlocalizedName("MadaraChestPlate").setCreativeTab(NarutoStyle);
-		MadaraLegging = new MadaraArmor(4005,MadaraArmor,Proxy.addArmor("MadaraArmor"),2).setUnlocalizedName("MadaraLegs").setCreativeTab(NarutoStyle);
-		MadaraBoots = new MadaraArmor(4006,MadaraArmor,Proxy.addArmor("MadaraArmor"),3).setUnlocalizedName("MadaraBoots").setCreativeTab(NarutoStyle);
+		gunbai = new Gunbai(4001,GunbaiTool).setUnlocalizedName("gunbai").setCreativeTab(NarutoStyle);
+		claySpider = new ClaySpider(4002).setUnlocalizedName("ClaySpider").setCreativeTab(NarutoStyle);
+		madaraHelmet = new MadaraArmor(4003,MadaraArmor,Proxy.addArmor("MadaraArmor"), 0).setUnlocalizedName("MadaraHelmet").setCreativeTab(NarutoStyle);
+		madaraChestPlate = new MadaraArmor(4004,MadaraArmor,Proxy.addArmor("MadaraArmor"),1).setUnlocalizedName("MadaraChestPlate").setCreativeTab(NarutoStyle);
+		madaraLegging = new MadaraArmor(4005,MadaraArmor,Proxy.addArmor("MadaraArmor"),2).setUnlocalizedName("MadaraLegs").setCreativeTab(NarutoStyle);
+		madaraBoots = new MadaraArmor(4006,MadaraArmor,Proxy.addArmor("MadaraArmor"),3).setUnlocalizedName("MadaraBoots").setCreativeTab(NarutoStyle);
 		//MadaraSkull = new MadaraSkull(4007).setUnlocalizedName("MadaraSkull");
 		//BlockMadaraSkull = new BlockMadaraSkull(4008,Material.cake).setUnlocalizedName("BlockMadaraSkull");
-		ClayBird = new ClayBird(4009).setUnlocalizedName("ClayBird").setCreativeTab(NarutoStyle);
-		C3 = new C3(4010).setUnlocalizedName("C3").setCreativeTab(NarutoStyle);
+		clayBird = new ClayBird(4009).setUnlocalizedName("ClayBird").setCreativeTab(NarutoStyle);
+		c3 = new C3(4010).setUnlocalizedName("C3").setCreativeTab(NarutoStyle);
 		//NarutoStylePainting = new NarutoStylePainting(4011).setUnlocalizedName("NarutoStylePainting");	
-		FourthHokageKunai = new NarutoStyleItems.FourthHokageKunai(4012).setUnlocalizedName("FourthHokageKunai").setCreativeTab(NarutoStyle);
-		DeidaraHand = new NarutoStyleItems.DeidaraHand(4013).setUnlocalizedName("DeidaraHand").setCreativeTab(NarutoStyle);
+		fourthHokageKunai = new NarutoStyleItems.FourthHokageKunai(4012).setUnlocalizedName("FourthHokageKunai").setCreativeTab(NarutoStyle);
+		deidaraHand = new NarutoStyleItems.DeidaraHand(4013).setUnlocalizedName("DeidaraHand").setCreativeTab(NarutoStyle);
 		//SmokeBomb = new NarutoStyleItems.SmokeBomb(4014).setUnlocalizedName("SmokeBomb").setCreativeTab(NarutoStyle);
-		Sharingan = new NarutoStyleItems.Sharingan(4015).setUnlocalizedName("Sharingan").setCreativeTab(NarutoStyle);
-		AkatsukiScroll = new NarutoStyleItems.AkatsukiScroll(4016).setUnlocalizedName("AkatsukiScroll").setCreativeTab(NarutoStyle);
-		DeidaraHair = new NarutoStyleItems.DeidaraHair(4017).setUnlocalizedName("DeidaraHair").setCreativeTab(NarutoStyle);
+		sharingan = new NarutoStyleItems.Sharingan(4015).setUnlocalizedName("Sharingan").setCreativeTab(NarutoStyle);
+		akatsukiScroll = new NarutoStyleItems.AkatsukiScroll(4016).setUnlocalizedName("AkatsukiScroll").setCreativeTab(NarutoStyle);
+		deidaraHair = new NarutoStyleItems.DeidaraHair(4017).setUnlocalizedName("DeidaraHair").setCreativeTab(NarutoStyle);
 		//DeidaraArena = new NarutoStyleBiomes.DeidaraArena(55).setColor(34234432).setBiomeName("Deidara Arena ").setDisableRain().setMinMaxHeight(0.2F, 1.0F);		
-		DeidaraClay = new NarutoStyleBlocks.DeidaraClay(4018, Material.grass).setUnlocalizedName("DeidaraClay").setCreativeTab(NarutoStyle).setHardness(100.0F).setResistance(100.0F);
+		deidaraClay = new NarutoStyleBlocks.DeidaraClay(4018, Material.grass).setUnlocalizedName("DeidaraClay").setCreativeTab(NarutoStyle).setHardness(100.0F).setResistance(100.0F);
 		
 		//Game Registry
 		//GameRegistry.registerBlock(BlockMadaraSkull, "BlackMadaraSkull");
-		GameRegistry.registerBlock(DeidaraClay, "DeidaraClay");
+		GameRegistry.registerBlock(deidaraClay, "DeidaraClay");
 		GameRegistry.registerTileEntity(TileEntityDeidaraClay.class, "Spawnning Deidara");
 		//Language Registrys
 		LanguageRegistry.addName(gunbai, "Gunbai");
-		LanguageRegistry.addName(ClaySpider, "Clay Spider");
-		LanguageRegistry.addName(MadaraHelmet, "Madara Helmet");
-		LanguageRegistry.addName(MadaraChestPlate, "Madara ChestPlate");
-		LanguageRegistry.addName(MadaraLegging, "Madara Legging");
-		LanguageRegistry.addName(MadaraBoots, "Madara Boots");
+		LanguageRegistry.addName(claySpider, "Clay Spider");
+		LanguageRegistry.addName(madaraHelmet, "Madara Helmet");
+		LanguageRegistry.addName(madaraChestPlate, "Madara ChestPlate");
+		LanguageRegistry.addName(madaraLegging, "Madara Legging");
+		LanguageRegistry.addName(madaraBoots, "Madara Boots");
 		//LanguageRegistry.addName(MadaraSkull,"Madara Skull");
 		//LanguageRegistry.addName(BlockMadaraSkull, "Block Madara Skull");
-		LanguageRegistry.addName(ClayBird, "Clay Bird");
-		LanguageRegistry.addName(C3, "C3");
+		LanguageRegistry.addName(clayBird, "Clay Bird");
+		LanguageRegistry.addName(c3, "C3");
 	    //LanguageRegistry.addName(NarutoStylePainting, "Naruto Painting");
-		LanguageRegistry.addName(FourthHokageKunai, "Fourth Hokage Kunai");
+		LanguageRegistry.addName(fourthHokageKunai, "Fourth Hokage Kunai");
 		LanguageRegistry.instance().addStringLocalization("Deidara","Deidara");
-		LanguageRegistry.addName(DeidaraHand, "Deidara Hand");
+		LanguageRegistry.addName(deidaraHand, "Deidara Hand");
 		LanguageRegistry.instance().addStringLocalization("itemGroup.NarutoStyle", "Naruto Style");
 		
 		//LanguageRegistry.addName(SmokeBomb, "Smoke Bomb");
-		LanguageRegistry.addName(Sharingan, "Sharingan");
-		LanguageRegistry.addName(AkatsukiScroll, "Akatsuki Scroll");
-		LanguageRegistry.addName(DeidaraHair, "Deidara Hair");
-		LanguageRegistry.addName(DeidaraClay, "Deidara Clay");
+		LanguageRegistry.addName(sharingan, "Sharingan");
+		LanguageRegistry.addName(akatsukiScroll, "Akatsuki Scroll");
+		LanguageRegistry.addName(deidaraHair, "Deidara Hair");
+		LanguageRegistry.addName(deidaraClay, "Deidara Clay");
 		
 		
 		
@@ -234,13 +256,12 @@ public class NarutoStyle_main {
         Proxy.registerRenderers();
 		Proxy.registerEvents();
 		//GameRegistry.addBiome(DeidaraArena);
-		KeyBindingRegistry.registerKeyBinding(new EyesKey(key, repeat));
+		//KeyBindingRegistry.registerKeyBinding(new EyesKey(key, repeat));
 		 GameRegistry.registerWorldGenerator(konohaGen);
 		
 	    
 		
-		//Villager Registry
-		 
+		 		 
 		
 	
 
