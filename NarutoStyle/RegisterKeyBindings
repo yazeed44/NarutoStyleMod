@@ -1,0 +1,45 @@
+package NarutoStyle;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import net.minecraft.client.settings.KeyBinding;
+
+import org.lwjgl.input.Keyboard;
+
+import cpw.mods.fml.client.registry.KeyBindingRegistry;
+
+public class RegisterKeyBindings
+{
+	/** Key index for easy handling */
+	public static final int SHARINGAN_INV = 0, SHARINGAN_NEXT = 1;
+	
+	/** Key descriptions */
+	private static final String[] desc = {"Eye Inventory","Next Eye"};
+	
+	/** Default key values */
+	private static final int[] keyValues = {Keyboard.KEY_M, Keyboard.KEY_N};
+	
+	/** Maps Keyboard values to KeyBinding index values (e.g. SHARINGAN_INV returns KEY_M) */
+	public static final Map<Integer, Integer> keyMap = new HashMap<Integer, Integer>();
+
+	/**
+	 * This will initialize all key bindings; I like to pass in a Configuration object, but
+	 * I won't be showing that here. Check the tutorial provided in the prerequisites section
+	 * for more advanced KeyBinding methods, specifically my posts therein.
+	 */
+	public static void init()
+	{
+		KeyBinding[] key = new KeyBinding[desc.length];
+		boolean[] repeat = new boolean[desc.length];
+		
+		for (int i = 0; i < desc.length; ++i)
+		{
+			key[i] = new KeyBinding(desc[i], keyValues[i]);
+			repeat[i] = false;
+			keyMap.put(key[i].keyCode, i);
+		}
+		
+		KeyBindingRegistry.registerKeyBinding(new NarutoKeyHandler(key, repeat));
+	}
+}
