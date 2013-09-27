@@ -2,69 +2,66 @@ package NarutoStyle;
 
 import java.util.EnumSet;
 
-import org.lwjgl.input.Keyboard;
-
-import NarutoStyleEyeInventory.ExtendedPlayerProperties;
+import NarutoStyleEyeInventory.ExtendedPlayer;
+import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
-import net.minecraftforge.event.Event;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.client.registry.KeyBindingRegistry;
 import cpw.mods.fml.client.registry.KeyBindingRegistry.KeyHandler;
 import cpw.mods.fml.common.TickType;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
-public class EyesKey extends KeyHandler {
-	 public EnumSet<TickType> tickTypes = EnumSet.of(TickType.CLIENT);
-	 public static KeyBinding login = new KeyBinding("Login", Keyboard.KEY_M);
-	 public static KeyBinding[] arrayOfKeys = new KeyBinding[] {login};
-	 public static boolean[] areRepeating = new boolean[] {false};
-	 public EntityPlayer player;
-	 public static boolean keyPressed = false;
-     
-     public KeyBinding key;
-     public boolean[] repeatings;
-	private boolean keyHasBeenPressed;
-     public EyesKey(KeyBinding[] key, boolean[] repeatings)
-     {
-             super(key, repeatings);
-     }
-     
-	
+@SideOnly(Side.CLIENT)
+public class NarutoKeyHandler extends KeyHandler
+{
+	/** Not really important. I use it to store/find keys in the config file */
+	public static final String label = "Naruto Style Keys";
 
-	
-
-	
-
-
-
-
-	@Override
-     public String getLabel()
-     {
-             return "EyesKey";
-     }
-     
-     @Override
-     public EnumSet<TickType> ticks()
-     {
-             return tickTypes;
-     }
-	@Override
-	public void keyDown(EnumSet<TickType> types, KeyBinding kb,
-			boolean tickEnd, boolean isRepeat) {
-		keyPressed = true;
-		}
-	@Override
-	public void keyUp(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd) {
-		
-		
-		if (keyHasBeenPressed) {
-            keyHasBeenPressed = false;
-            keyPressed = true; }
+	public NarutoKeyHandler(KeyBinding[] keyBindings, boolean[] repeatings) {
+		super(keyBindings, repeatings);
 	}
 
+	@Override
+	public String getLabel() {
+		return this.label;
+	}
+
+	@Override
+	public void keyDown(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd, boolean isRepeat)
+	{
+		if (tickEnd && RegisterKeyBindings.keyMap.containsKey(kb.keyCode))
+		{
+			EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
+
+			switch(RegisterKeyBindings.keyMap.get(kb.keyCode)) {
+			case RegisterKeyBindings.SHARINGAN_INV:
+				if (player.openContainer != null && player.openContainer instanceof ContainerEye)
+					player.closeScreen();
+				else if (FMLClientHandler.instance().getClient().inGameHasFocus)
+					PacketHandler.sendOpenGuiPacket(NarutoStyle_main.eyeGuiId);
+				break;
+			case RegisterKeyBindings.SHARINGAN_NEXT:
+				if (player.openContainer != null && player.openContainer instanceof ContainerEye) {
+					PacketHandler.sendNextActiveEyePacket();
+					((ContainerEye) player.openContainer).nextActiveSlot();
+				} else if (FMLClientHandler.instance().getClient().inGameHasFocus) {
+					PacketHandler.sendNextActiveEyePacket();
+					ExtendedPlayer.get(player).sharingan.nextActiveSlot();
+				}
+				break;
+			}
+		}
+	}
+
+	@Override
+	public void keyUp(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd) {
+		// Don't need to do anything here!
+	}
+
+	@Override
+	public EnumSet<TickType> ticks() {
+		// We're only interested in player ticks, as that's when the keyboard will fire
+		return EnumSet.of(TickType.PLAYER);
+	}
 }
