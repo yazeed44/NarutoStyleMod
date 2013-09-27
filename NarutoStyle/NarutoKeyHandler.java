@@ -51,6 +51,9 @@ public class NarutoKeyHandler extends KeyHandler
 				}
 				break;
 			}
+			case RegisterKeyBindings.SHARINGAN_USE:
+				PacketHandler.sendUseEyePacket();
+				break;
 		}
 	}
 
