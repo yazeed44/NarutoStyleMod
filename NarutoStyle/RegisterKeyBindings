@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraftforge.common.Configuration;
 
 import org.lwjgl.input.Keyboard;
 
@@ -28,18 +29,26 @@ public class RegisterKeyBindings
 	 * I won't be showing that here. Check the tutorial provided in the prerequisites section
 	 * for more advanced KeyBinding methods, specifically my posts therein.
 	 */
-	public static void init()
+	public static void init(Configuration config)
 	{
 		KeyBinding[] key = new KeyBinding[desc.length];
 		boolean[] repeat = new boolean[desc.length];
 		
-		for (int i = 0; i < desc.length; ++i)
+		/*for (int i = 0; i < desc.length; ++i)
 		{
 			key[i] = new KeyBinding(desc[i], keyValues[i]);
 			repeat[i] = false;
 			keyMap.put(key[i].keyCode, i);
-		}
+		}*/
+		for (int i = 0; i < desc.length; ++i) {
+			key[i] = new KeyBinding(desc[i], config.get(EyesKey.label, desc[i], keyValues[i]).getInt());
+			repeat[i] = false;
+			keyMap.put(key[i].keyCode, i);
+			}
+
 		
-		KeyBindingRegistry.registerKeyBinding(new NarutoKeyHandler(key, repeat));
+		KeyBindingRegistry.registerKeyBinding(new EyesKey(key, repeat));
 	}
+
+	
 }
