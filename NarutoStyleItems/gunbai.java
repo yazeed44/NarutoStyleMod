@@ -6,9 +6,9 @@ import net.minecraft.item.EnumToolMaterial;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemSword;
 
-public class gunbai extends ItemSword {
+public class Gunbai extends ItemSword {
 
-	public gunbai(int id, EnumToolMaterial gunbaiTool ) {
+	public Gunbai(int id, EnumToolMaterial gunbaiTool ) {
 		super(id, gunbaiTool);
 		this.setCreativeTab(CreativeTabs.tabCombat);
 		this.maxStackSize = 1;
