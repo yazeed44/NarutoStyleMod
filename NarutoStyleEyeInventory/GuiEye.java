@@ -50,9 +50,14 @@ public class GuiEye extends GuiContainer {
      */
     protected void drawGuiContainerForegroundLayer(int par1, int par2)
     {
-            String s = this.inventory.isInvNameLocalized() ? this.inventory.getInvName() : I18n.func_135053_a(this.inventory.getInvName());
-            this.fontRenderer.drawString(s, this.xSize - 52 - this.fontRenderer.getStringWidth(s) / 2, 12, 4210752);
-            this.fontRenderer.drawString(I18n.func_135053_a("container.inventory"), 80, this.ySize - 96, 4210752);
+    	String s = inventory.isInvNameLocalized() ? inventory.getInvName() : I18n.getString(inventory.getInvName());
+    	fontRenderer.drawString(s, xSize - 52 - fontRenderer.getStringWidth(s) / 2, 12, 4210752);
+    	fontRenderer.drawString(I18n.getString("container.inventory"), 80, ySize - 96, 4210752);
+            
+    	int activeSlot = inventory.getActiveSlot();
+    	GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+    	mc.renderEngine.bindTexture(iconLocation);
+    	drawTexturedModalRect(79, 7 + (18 * activeSlot), 176, 0, 18, 18);
     }
 
     /**
