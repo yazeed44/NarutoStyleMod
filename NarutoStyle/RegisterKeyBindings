@@ -13,13 +13,13 @@ import cpw.mods.fml.client.registry.KeyBindingRegistry;
 public class RegisterKeyBindings
 {
 	/** Key index for easy handling */
-	public static final int SHARINGAN_INV = 0, SHARINGAN_NEXT = 1;
+	public static final int SHARINGAN_INV = 0, SHARINGAN_NEXT = 1, SHARINGAN_USE = 2;
 	
 	/** Key descriptions */
-	private static final String[] desc = {"Eye Inventory","Next Eye"};
+	private static final String[] desc = {"Eye Inventory","Next Eye","Use Sharingan"};
 	
 	/** Default key values */
-	private static final int[] keyValues = {Keyboard.KEY_M, Keyboard.KEY_N};
+	private static final int[] keyValues = {Keyboard.KEY_M, Keyboard.KEY_N, Keyboard.KEY_B};
 	
 	/** Maps Keyboard values to KeyBinding index values (e.g. SHARINGAN_INV returns KEY_M) */
 	public static final Map<Integer, Integer> keyMap = new HashMap<Integer, Integer>();
@@ -34,12 +34,6 @@ public class RegisterKeyBindings
 		KeyBinding[] key = new KeyBinding[desc.length];
 		boolean[] repeat = new boolean[desc.length];
 		
-		/*for (int i = 0; i < desc.length; ++i)
-		{
-			key[i] = new KeyBinding(desc[i], keyValues[i]);
-			repeat[i] = false;
-			keyMap.put(key[i].keyCode, i);
-		}*/
 		for (int i = 0; i < desc.length; ++i) {
 			key[i] = new KeyBinding(desc[i], config.get(EyesKey.label, desc[i], keyValues[i]).getInt());
 			repeat[i] = false;
