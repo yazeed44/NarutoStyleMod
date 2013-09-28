@@ -20,6 +20,18 @@ public class InventoryEye implements IInventory
 	}
 	
 	/**
+	 * Call this method from a TickHandler to update stored ItemStacks
+	 * Item onUpdate method is not called for custom inventories
+	 */
+	public void onUpdateTick(World world)
+	{
+		for (int i = 0; i < getSizeInventory(); ++i) {
+			if (getStackInSlot(i) != null)
+				Sharingan.onUpdateTick(getStackInSlot(i), world);
+		}
+	}
+	
+	/**
 	 * Returns index of slot that is 'active'
 	 */
 	public int getActiveSlot() {
