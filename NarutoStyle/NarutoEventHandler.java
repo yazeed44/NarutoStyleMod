@@ -8,7 +8,7 @@ import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
-public class EventHandler
+public class NarutoEventHandler
 {
 	@ForgeSubscribe
 	public void onEntityConstructing(EntityConstructing event)
