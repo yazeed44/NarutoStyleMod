@@ -3,11 +3,8 @@ package NarutoStyle;
 
 import java.util.logging.Logger;
 
-import org.lwjgl.input.Keyboard;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityEggInfo;
@@ -44,7 +41,6 @@ import NarutoStyleItems.ClayBird;
 import NarutoStyleItems.ClaySpider;
 import NarutoStyleItems.MadaraArmor;
 import NarutoStyleItems.Gunbai;
-import cpw.mods.fml.client.registry.KeyBindingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.Mod;
@@ -61,11 +57,10 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.common.registry.VillagerRegistry;
-import cpw.mods.fml.relauncher.Side;
 
 @Mod(modid = NarutoStyle_main.modid ,name="NarutoStyle",version = "Second Release")
 @NetworkMod(clientSideRequired=true, serverSideRequired=false,
-channels={"NarutoStyle"}, packetHandler = PacketHandler.class)
+channels={NarutoStyle_main.channel}, packetHandler = PacketHandler.class)
 
 public class NarutoStyle_main {
 
@@ -92,22 +87,16 @@ public class NarutoStyle_main {
 	public static BiomeGenBase deidaraArena;
 	public static Block deidaraClay;
 	public static boolean someConfigFlag;
-	//static KeyBinding[] key = {new KeyBinding("Eyes", Keyboard.KEY_M)};
-    //static boolean[] repeat = {false};
-	
 
 	// GUI indices:
 	public static final int eyeGuiId = modGuiIndex++;
-
-	
-	
 	
 	@SidedProxy(clientSide="NarutoStyle.ClientProxy", serverSide="NarutoStyle.CommonProxy")
-	public static CommonProxy Proxy;
+	public static CommonProxy proxy;
 	
 	@Instance("NarutoStyle")
-	public static NarutoStyle_main Instance = new NarutoStyle_main();
-	public static final String modid = "NarutoStyle";
+	public static NarutoStyle_main instance = new NarutoStyle_main();
+	public static final String modid = "NarutoStyle", channel = "NarutoStyle";
 	static int startEntityId = 6001;
 	public static CreativeTabs NarutoStyle = new CreativeTabs("NarutoStyle"){
 		public ItemStack getIconItemStack(){
@@ -129,8 +118,8 @@ public class NarutoStyle_main {
     	// Since this flag is a boolean, we can read it into the variable directly from the config.
         someConfigFlag = config.get(Configuration.CATEGORY_GENERAL, "SomeConfigFlag", false).getBoolean(false);
         //RegisterKeyBindings.init(config); 
-        if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
-			 RegisterKeyBindings.init(config);
+        if (FMLCommonHandler.instance().getSide().isClient())
+		RegisterKeyBindings.init(config);
 
         config.save();
     }
@@ -153,10 +142,10 @@ public class NarutoStyle_main {
 		// Introduction Items and armors
 		gunbai = new Gunbai(4001,GunbaiTool).setUnlocalizedName("gunbai").setCreativeTab(NarutoStyle);
 		claySpider = new ClaySpider(4002).setUnlocalizedName("ClaySpider").setCreativeTab(NarutoStyle);
-		madaraHelmet = new MadaraArmor(4003,MadaraArmor,Proxy.addArmor("MadaraArmor"), 0).setUnlocalizedName("MadaraHelmet").setCreativeTab(NarutoStyle);
-		madaraChestPlate = new MadaraArmor(4004,MadaraArmor,Proxy.addArmor("MadaraArmor"),1).setUnlocalizedName("MadaraChestPlate").setCreativeTab(NarutoStyle);
-		madaraLegging = new MadaraArmor(4005,MadaraArmor,Proxy.addArmor("MadaraArmor"),2).setUnlocalizedName("MadaraLegs").setCreativeTab(NarutoStyle);
-		madaraBoots = new MadaraArmor(4006,MadaraArmor,Proxy.addArmor("MadaraArmor"),3).setUnlocalizedName("MadaraBoots").setCreativeTab(NarutoStyle);
+		madaraHelmet = new MadaraArmor(4003,MadaraArmor,proxy.addArmor("MadaraArmor"), 0).setUnlocalizedName("MadaraHelmet").setCreativeTab(NarutoStyle);
+		madaraChestPlate = new MadaraArmor(4004,MadaraArmor,proxy.addArmor("MadaraArmor"),1).setUnlocalizedName("MadaraChestPlate").setCreativeTab(NarutoStyle);
+		madaraLegging = new MadaraArmor(4005,MadaraArmor,proxy.addArmor("MadaraArmor"),2).setUnlocalizedName("MadaraLegs").setCreativeTab(NarutoStyle);
+		madaraBoots = new MadaraArmor(4006,MadaraArmor,proxy.addArmor("MadaraArmor"),3).setUnlocalizedName("MadaraBoots").setCreativeTab(NarutoStyle);
 		//MadaraSkull = new MadaraSkull(4007).setUnlocalizedName("MadaraSkull");
 		//BlockMadaraSkull = new BlockMadaraSkull(4008,Material.cake).setUnlocalizedName("BlockMadaraSkull");
 		clayBird = new ClayBird(4009).setUnlocalizedName("ClayBird").setCreativeTab(NarutoStyle);
@@ -253,19 +242,13 @@ public class NarutoStyle_main {
 
         NetworkRegistry.instance().registerGuiHandler(this, new GuiHandler());
         TickRegistry.registerTickHandler(new NarutoTickHandler(), Side.SERVER);
-        Proxy.registerRenderers();
-		Proxy.registerEvents();
-		//GameRegistry.addBiome(DeidaraArena);
-		//KeyBindingRegistry.registerKeyBinding(new EyesKey(key, repeat));
-		 GameRegistry.registerWorldGenerator(konohaGen);
-		
-	    
-		
-		 		 
-		
+        proxy.registerRenderers();
+	proxy.registerEvents();
+	//GameRegistry.addBiome(DeidaraArena);
+	GameRegistry.registerWorldGenerator(konohaGen);
 	
-
-
+	if (FMLCommonHandler.instance().getSide().isClient())
+		MinecraftForge.EVENT_BUS.register(new GuiSharinganOverlay(Minecraft.getMinecraft()));
 }
 	
 	
