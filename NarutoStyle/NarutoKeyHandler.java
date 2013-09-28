@@ -50,10 +50,10 @@ public class NarutoKeyHandler extends KeyHandler
 					ExtendedPlayer.get(player).sharingan.nextActiveSlot();
 				}
 				break;
-			}
 			case RegisterKeyBindings.SHARINGAN_USE:
 				PacketHandler.sendUseEyePacket();
 				break;
+			}
 		}
 	}
 
