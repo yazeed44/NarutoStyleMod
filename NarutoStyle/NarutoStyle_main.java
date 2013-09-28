@@ -193,7 +193,10 @@ public class NarutoStyle_main {
 		LanguageRegistry.instance().addStringLocalization("itemGroup.NarutoStyle", "Naruto Style");
 		
 		//LanguageRegistry.addName(SmokeBomb, "Smoke Bomb");
-		LanguageRegistry.addName(sharingan, "Sharingan");
+		for (int i = 0; i < Sharingan.SHARINGAN_NAMES.length; ++i) {
+			ItemStack eye = new ItemStack(sharingan,1,i);
+			LanguageRegistry.addName(eye, Sharingan.SHARINGAN_NAMES[i]);
+		}
 		LanguageRegistry.addName(akatsukiScroll, "Akatsuki Scroll");
 		LanguageRegistry.addName(deidaraHair, "Deidara Hair");
 		LanguageRegistry.addName(deidaraClay, "Deidara Clay");
