@@ -6,6 +6,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.world.World;
 
 public class InventoryEye implements IInventory
 {
@@ -13,27 +14,46 @@ public class InventoryEye implements IInventory
 	
 	private final ItemStack[] items = new ItemStack[INV_SIZE];
 	
-	private final NBTTagCompound compound;
+	public final NBTTagCompound compound;
 	
 	public InventoryEye(NBTTagCompound compound) {
 		this.compound = compound;
 	}
 	
 	/**
+	 * Call this method from a TickHandler to update stored ItemStacks
+	 * Item onUpdate method is not called for custom inventories
+	 */
+	public void onUpdateTick(World world)
+	{
+		for (int i = 0; i < getSizeInventory(); ++i) {
+			if (getStackInSlot(i) != null)
+				Sharingan.onUpdateTick(getStackInSlot(i), world);
+		}
+	}
+	
+	/**
 	 * Returns index of slot that is 'active'
 	 */
 	public int getActiveSlot() {
-		return compound.getInteger("ActiveSlot");
+		return compound.getByte("ActiveSlot");
+	}
+	
+	/**
+	 * Sets active slot to index or 0 if index is out of bounds
+	 */
+	public void setActiveSlot(int index) {
+		if (index >= 0 && index < ACTIVE_SLOT)
+			compound.setByte("ActiveSlot", (byte) index);
+		else
+			compound.setByte("ActiveSlot", (byte) 0);
 	}
 
 	/**
 	 * Sets the active slot index to the next index within the inventory size
 	 */
-	public void nextActiveSlot()
-	{
-		int activeSlot = getActiveSlot() + 1;
-		if (activeSlot == ACTIVE_SLOT) { activeSlot = 0; }
-		compound.setInteger("ActiveSlot", activeSlot);
+	public void nextActiveSlot() {
+		setActiveSlot(getActiveSlot() + 1);
 	}
 	
 	@Override
@@ -86,7 +106,7 @@ public class InventoryEye implements IInventory
 			itemstack.stackSize = getInventoryStackLimit();
 		}
 
-		this.onInventoryChanged();
+		onInventoryChanged();
 	}
 
 	@Override
@@ -127,8 +147,6 @@ public class InventoryEye implements IInventory
 	
 	@Override
 	public boolean isItemValidForSlot(int slot, ItemStack stack) {
-		/** NEVER declare a new Item outside of your main mod!!! */
-		//Sharingan sharingan = new Sharingan(4015);
 		return stack.getItem() instanceof Sharingan;
 	}
 	
@@ -145,6 +163,8 @@ public class InventoryEye implements IInventory
 				setInventorySlotContents(slot, ItemStack.loadItemStackFromNBT(item));
 			}
 		}
+		
+		setActiveSlot(compound.getByte("ActiveSlot"));
 	}
 	
 	public void writeToNBT(NBTTagCompound compound)
@@ -163,5 +183,6 @@ public class InventoryEye implements IInventory
 		}
 		
 		compound.setTag("EyeInventory", items);
+		compound.setByte("ActiveSlot", (byte) getActiveSlot());
 	}
 }
