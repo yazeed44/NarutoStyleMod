@@ -7,6 +7,7 @@ import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 
 public class EventHandler
 {
@@ -37,7 +38,15 @@ public class EventHandler
 		}
 	}
 	
-	// all keyboard interactions will be handled from the KeyHandler instead of onLivingUpdate
+	@ForgeSubscribe
+	public void onLivingUpdate(LivingUpdateEvent event)
+	{
+		if (event.entity instanceof EntityPlayer)
+		{
+			EntityPlayer player = (EntityPlayer) event.entity;
+			ExtendedPlayer.get(player).sharingan.onUpdateTick(player.worldObj);
+		}
+	}
 }
 		
 		
