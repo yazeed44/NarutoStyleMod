@@ -260,7 +260,7 @@ public class NarutoStyle_main {
 		 GameRegistry.registerWorldGenerator(konohaGen);
 		
 	    
-		
+	MinecraftForge.EVENT_BUS.register(new NarutoEventHandler());	
 		 		 
 		
 	
