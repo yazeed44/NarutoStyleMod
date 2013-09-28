@@ -1,18 +1,9 @@
 package NarutoStyleEyeInventory;
 
-import java.io.DataOutputStream;
 
-import org.apache.commons.io.output.ByteArrayOutputStream;
-
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
-import cpw.mods.fml.relauncher.Side;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 
@@ -78,7 +69,8 @@ public class ExtendedPlayer implements IExtendedEntityProperties
 		if(savedData != null) {
 			playerData.loadNBTData(savedData);
 		}
-		// playerData.sync(); // nothing to sync
+		
+		playerData.sync();
 	}
 
 	/**
@@ -116,6 +108,10 @@ public class ExtendedPlayer implements IExtendedEntityProperties
 	{
 	}
 	
-	public final void sync() {}
+	public final void sync()
+	{
+		if (FMLCommonHandler.instance().getEffectiveSide().isServer())
+			PacketHandler.sendSyncEyeInventoryPacket(player, sharingan);
+	}
 	
 }
