@@ -96,6 +96,66 @@ public class Sharingan extends Item
 		}
 	}
 	
+	@Override
+	public int getMaxItemUseDuration(ItemStack stack) {
+		return 72000;
+	}
+	
+	@Override
+	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player)
+	{
+		player.setItemInUse(stack, this.getMaxItemUseDuration(stack));
+		
+		return stack;
+	}
+	
+	@Override
+	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int ticksInUse)
+	{
+		// Tries to place new eye in eye inventory, replacing generic SHARINGAN type if necessary
+		if (grantSharingan(stack, player, SHARINGAN)) {
+			player.setCurrentItemOrArmor(0, null);
+		}
+	}
+	
+	/**
+	 * Returns true if new Eye placed in inventory; tries to set in empty slot first, then
+	 * if no empty slot will replace slot containing eye of overrideType, if it exists
+	 * Replaced eye will be given back to the player
+	 * @param overrideType Type of eye to replace (e.g. SHARINGAN) or -1 if shouldn't replace
+	 */
+	public static boolean grantSharingan(ItemStack newEye, EntityPlayer player, int overrideType)
+	{
+		if (newEye != null && newEye.getItem() instanceof Sharingan)
+		{
+			InventoryEye inv = ExtendedPlayer.get(player).sharingan;
+			int replaceSlot = -1;
+			
+			for (int i = 0; i < inv.getSizeInventory(); ++i)
+			{
+				if (inv.getStackInSlot(i) == null) {
+					inv.setInventorySlotContents(i, newEye);
+					return true;
+				} else {
+					ItemStack oldEye = inv.getStackInSlot(i);
+					if (inv.isItemValidForSlot(i, oldEye) && oldEye.getItemDamage() == overrideType && replaceSlot == -1) {
+						replaceSlot = i;
+					}
+				}
+			}
+			
+			// no null slots available, but type to override is present
+			// Replacing an eye should damage the player
+			if (replaceSlot != -1 && newEye.getItemDamage() != overrideType) {
+				player.inventory.addItemStackToInventory(inv.getStackInSlotOnClosing(replaceSlot));
+				inv.setInventorySlotContents(replaceSlot, newEye);
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	/**
 	 * A method to manually update, since onUpdate is not called from custom inventory slots
 	 */
