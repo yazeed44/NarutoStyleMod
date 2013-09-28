@@ -26,18 +26,6 @@ public class SlotEye extends Slot
 	public boolean isItemValid(ItemStack itemstack) {
 		return itemstack.getItem() instanceof Sharingan;
 	}
-}
-
-class SlotEyeActive extends SlotEye
-{
-	public SlotEyeActive(IInventory inventory, int par2, int par3, int par4) {
-		super(inventory, par2, par3, par4);
-	}
-
-	@Override
-	public boolean isItemValid(ItemStack itemstack) {
-		return false;
-	}
 	
 	@Override
 	public boolean canTakeStack(EntityPlayer player) {
