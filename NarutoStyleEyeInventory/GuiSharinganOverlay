@@ -1,0 +1,93 @@
+package NarutoStyleEyeInventory;
+
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
+import net.minecraftforge.event.EventPriority;
+import net.minecraftforge.event.ForgeSubscribe;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+
+@SideOnly(Side.CLIENT)
+public class GuiSharinganOverlay extends Gui
+{
+	private Minecraft mc;
+	
+	protected static final RenderItem itemRenderer = new RenderItem();
+
+	private static final ResourceLocation iconLocation = new ResourceLocation("NarutoStyle:textures/gui/eye.png");
+
+	private static final int TEXTURE_SIZE = 22, BASE_U_OFFSET = 176, BASE_V_OFFSET = 18;
+
+	public GuiSharinganOverlay(Minecraft mc) {
+		super();
+		this.mc = mc;
+	}
+
+	@ForgeSubscribe(priority = EventPriority.NORMAL)
+	public void onRenderExperienceBar(RenderGameOverlayEvent event)
+	{
+		if (event.isCancelable() || event.type != ElementType.HOTBAR) {
+			return;
+		}
+		
+		int x = event.resolution.getScaledWidth() / 2 - 118;
+		int y = event.resolution.getScaledHeight() - 22;
+		this.zLevel = -90.0F;
+		this.mc.getTextureManager().bindTexture(iconLocation);
+
+		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		drawTexturedModalRect(x, y, BASE_U_OFFSET, BASE_V_OFFSET, TEXTURE_SIZE, TEXTURE_SIZE);
+
+		ExtendedPlayer props = ExtendedPlayer.get(mc.thePlayer);
+		ItemStack sharingan = props.sharingan.getStackInSlot(props.sharingan.getActiveSlot());
+		
+		if (sharingan != null && sharingan.getItem() instanceof Sharingan)
+		{
+			GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+			RenderHelper.enableGUIStandardItemLighting();
+			
+			renderInventoryItem(sharingan, x+3, y+3, event.partialTicks);
+
+			RenderHelper.disableStandardItemLighting();
+			GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+		}
+	}
+
+	/**
+	 * Renders an ItemStack at position x, y for partialTick
+	 */
+	protected void renderInventoryItem(ItemStack itemstack, int x, int y, float partialTick)
+	{
+		if (itemstack != null)
+		{
+			float f1 = (float) itemstack.animationsToGo - partialTick;
+
+			if (f1 > 0.0F)
+			{
+				GL11.glPushMatrix();
+				float f2 = 1.0F + f1 / 5.0F;
+				GL11.glTranslatef((float)(x + 8), (float)(y + 12), 0.0F);
+				GL11.glScalef(1.0F / f2, (f2 + 1.0F) / 2.0F, 1.0F);
+				GL11.glTranslatef((float)(-(x + 8)), (float)(-(y + 12)), 0.0F);
+			}
+
+			itemRenderer.renderItemAndEffectIntoGUI(this.mc.fontRenderer, this.mc.getTextureManager(), itemstack, x, y);
+
+			if (f1 > 0.0F)
+			{
+				GL11.glPopMatrix();
+			}
+
+			itemRenderer.renderItemOverlayIntoGUI(this.mc.fontRenderer, this.mc.getTextureManager(), itemstack, x, y);
+		}
+	}
+}
