@@ -10,9 +10,6 @@ public class CommonProxy  {
 	private static final Map<String, NBTTagCompound> extendedEntityData = new HashMap<String, NBTTagCompound>();
 	
 	public void registerRenderers() {}
-	
-	// This should be done in the main mod as well
-	public void registerEvents()
 	 
 	public int addArmor(String string) {
 		 return 0;
